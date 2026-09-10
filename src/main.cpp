@@ -1,6 +1,11 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+
+#include <vector>
+
 #include <iostream>
 static void error_callback(int error, const char *description) {
   fprintf(stderr, "[GLFW Error] %d: %s\n", error, description);
@@ -130,6 +135,33 @@ int main() {
   glEnable(GL_DEBUG_OUTPUT);
   glDebugMessageCallback(gl_debug_callback, nullptr); // set callback func
 
+  // data
+  std::vector<glm::vec2> pos{{-0.5f, 0.0f}, {0.5f, 0.0f}, {0.0f, 0.5f}};
+  std::vector<unsigned int> indices{0, 1, 2};
+
+  /*buffers*/
+  unsigned int VAO, VBO, EBO;
+  glGenVertexArrays(1, &VAO);
+  glGenBuffers(1, &VBO);
+  glGenBuffers(1, &EBO);
+  // upload data
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, pos.size() * sizeof(glm::vec2), pos.data(),
+               GL_STATIC_DRAW);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size(), indices.data(),
+               GL_STATIC_DRAW);
+  // bind
+  glBindVertexArray(VAO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void *)0);
+
+  glEnableVertexAttribArray(0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBindVertexArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
   // 7. 主循环
   while (!glfwWindowShouldClose(window)) {
     // 设置清屏颜色
@@ -137,6 +169,9 @@ int main() {
 
     // 清除颜色缓冲
     glClear(GL_COLOR_BUFFER_BIT);
+
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void *)0);
 
     // 把后端绘制结果显示到窗口
     glfwSwapBuffers(window);
