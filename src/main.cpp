@@ -5,10 +5,22 @@
 #include <glm/vec3.hpp>
 
 #include <vector>
-
 #include <iostream>
+
+#include <MyTools.hpp>
 static void error_callback(int error, const char *description) {
   fprintf(stderr, "[GLFW Error] %d: %s\n", error, description);
+}
+static void resize_viewport_callback(GLFWwindow *window, int width,
+                                     int height) {
+
+  glViewport(0, 0, width, height);
+}
+static void key_callback(GLFWwindow *window, int key, int scancode, int action,
+                         int mods) {
+  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+    glfwSetWindowShouldClose(window, true);
+  }
 }
 static void APIENTRY gl_debug_callback(GLenum source, GLenum type, GLuint id,
                                        GLenum severity, GLsizei length,
@@ -134,9 +146,14 @@ int main() {
   }
   glEnable(GL_DEBUG_OUTPUT);
   glDebugMessageCallback(gl_debug_callback, nullptr); // set callback func
+  glfwSetFramebufferSizeCallback(window, resize_viewport_callback);
+  int winWidth, winHeight;
+  glfwGetFramebufferSize(window, &winWidth, &winHeight);
+  glViewport(0, 0, winWidth, winHeight);
+  glfwSetKeyCallback(window, key_callback);
 
   // data
-  std::vector<glm::vec2> pos{{-0.5f, 0.0f}, {0.5f, 0.0f}, {0.0f, 0.5f}};
+  std::vector<glm::vec2> pos{{-0.5f, -0.5f}, {0.5f, -0.5f}, {0.0f, 0.5f}};
   std::vector<unsigned int> indices{0, 1, 2};
 
   /*buffers*/
@@ -150,18 +167,59 @@ int main() {
                GL_STATIC_DRAW);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size(), indices.data(),
-               GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
+               indices.data(), GL_STATIC_DRAW);
   // bind
   glBindVertexArray(VAO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void *)0);
-
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
   glBindVertexArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+  /*shaders*/
+  unsigned int vertexShaderHandler, fragmentShaderHandler;
+  vertexShaderHandler = glCreateShader(GL_VERTEX_SHADER);
+  fragmentShaderHandler = glCreateShader(GL_FRAGMENT_SHADER);
+  std::string vertexShaderSource, fragmentShaderSource;
+  MyTools::ReadShaderSource(
+      "/home/utopia010/project/opengl-particle/src/shaders/simple.vert",
+      vertexShaderSource, true);
+  MyTools::ReadShaderSource(
+      "/home/utopia010/project/opengl-particle/src/shaders/simple.frag",
+      fragmentShaderSource, true);
+  const char *tempVertexSource = vertexShaderSource.data();
+  const char *tempFragSource = fragmentShaderSource.data();
+  glShaderSource(vertexShaderHandler, 1, &tempVertexSource, nullptr);
+  glShaderSource(fragmentShaderHandler, 1, &tempFragSource, nullptr);
+  glCompileShader(vertexShaderHandler);
+  int success;
+  glGetShaderiv(vertexShaderHandler, GL_COMPILE_STATUS, &success);
+  if (!success) {
+    char buf[512] = {0};
+    glGetShaderInfoLog(vertexShaderHandler, 512, nullptr, buf);
+    std::printf("[ERROR]>[SHADER]>[VERTEX]>[COMPILE]: %s\n", buf);
+  }
+  glCompileShader(fragmentShaderHandler);
+  glGetShaderiv(fragmentShaderHandler, GL_COMPILE_STATUS, &success);
+  if (!success) {
+    char buf[512] = {0};
+    glGetShaderInfoLog(fragmentShaderHandler, 512, nullptr, buf);
+    std::printf("[ERROR]>[SHADER]>[FRAGMENT]>[COMPILE]: %s\n", buf);
+  }
+  unsigned int shaderProgramHandler = glCreateProgram();
+  glAttachShader(shaderProgramHandler, vertexShaderHandler);
+  glAttachShader(shaderProgramHandler, fragmentShaderHandler);
+  glLinkProgram(shaderProgramHandler);
+  glGetProgramiv(shaderProgramHandler, GL_LINK_STATUS, &success);
+  if (!success) {
+    char buf[512] = {0};
+    glGetProgramInfoLog(shaderProgramHandler, 512, nullptr, buf);
+    std::printf("[ERROR]>[SHADER]>[PROGRAM]>[LINK]: %s\n", buf);
+  }
+  glDeleteShader(vertexShaderHandler);
+  glDeleteShader(fragmentShaderHandler);
   // 7. 主循环
   while (!glfwWindowShouldClose(window)) {
     // 设置清屏颜色
@@ -169,7 +227,7 @@ int main() {
 
     // 清除颜色缓冲
     glClear(GL_COLOR_BUFFER_BIT);
-
+    glUseProgram(shaderProgramHandler);
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void *)0);
 
