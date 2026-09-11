@@ -20,9 +20,13 @@ add_subdirectory(./MyClass)
 
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
+set(assimp_DIR "/home/utopia010/libs/assimp-lib/lib/cmake/assimp-6.0")
+find_package(assimp REQUIRED)
 
 add_executable(a.out src/main.cpp)
-target_link_libraries(a.out PRIVATE glfw OpenGL::GL glad::glad glm::glm myClass)
+target_link_libraries(a.out PRIVATE
+    glfw OpenGL::GL glad::glad
+    glm::glm myClass assimp::assimp)
 
 add_executable(test src/test.cpp)
 target_link_libraries(test PRIVATE glfw OpenGL::GL glad::glad)
