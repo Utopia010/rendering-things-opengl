@@ -1,2 +1,5 @@
-add_library(myClass INTERFACE)
-target_include_directories(myClass INTERFACE ./include)
+add_library(myClass STATIC)
+target_include_directories(myClass PUBLIC ./include)
+file(GLOB source_files "./src/*.cpp")
+target_sources(myClass PRIVATE ${source_files})
+target_link_libraries(myClass PUBLIC glm::glm)

@@ -1,4 +1,4 @@
-#include <glad/glad.h>
+#include <glad/gl.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 
@@ -20,7 +20,7 @@ bool init() {
   }
   glfwMakeContextCurrent(window);
   // load function pointer of OpenGl using glad
-  if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
+  if (!gladLoadGL(glfwGetProcAddress)) {
     std::cerr << "Failed to initialize GLAD\n";
     glfwDestroyWindow(window);
     glfwTerminate();
