@@ -12,3 +12,5 @@ endif()
 foreach(item IN ITEMS shader_files)
     set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS item)
 endforeach()
+
+set(show_include_path "${CMAKE_CURRENT_SOURCE_DIR}/include" PARENT_SCOPE)

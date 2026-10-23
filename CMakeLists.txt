@@ -40,15 +40,21 @@ target_link_libraries(imgui PUBLIC glfw)
 
 # my class
 add_subdirectory(./MyClass)
-
+message("=======")
+message("${my_class_include_path}")
+message("${my_class_source_files}")
 find_package(OpenGL REQUIRED)
 find_package(assimp REQUIRED)
 
 # src
 add_subdirectory(src)
-
-add_executable(a.out main.cpp)
+message("=========")
+message(">${show_include_path}")
+add_executable(a.out main.cpp ${my_class_source_files})
+target_include_directories(a.out PRIVATE ${my_class_include_path})
+target_include_directories(a.out PRIVATE ${show_include_path})
+target_compile_definitions(a.out PRIVATE GLFW_INCLUDE_NONE)
 target_link_libraries(a.out PRIVATE
     OpenGL::GL glad::glad
-    glm::glm myClass assimp::assimp
+    glm::glm assimp::assimp
     imgui)

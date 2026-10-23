@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cstdint>
 #include <glad/gl.h>
 #include <iostream>
@@ -39,16 +41,16 @@ public:
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
   void updateVBOData(void *data, unsigned int size) {
-    glBindBuffer(GL_ARRAY_BUFFER, VBOHandler_);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-  }
-  void addEBOData(std::vector<unsigned int> indices) {
-    countEBO_ = indices.size();
     if (!is_changed_) {
       std::printf(
           "[WARNING]: this VBO is not dynamic to change data frequently\n");
     }
+    glBindBuffer(GL_ARRAY_BUFFER, VBOHandler_);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  }
+  void addEBOData(std::vector<unsigned int> &indices) {
+    countEBO_ = indices.size();
     bind();
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOHandler_);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(),

@@ -1,10 +1,12 @@
-#include <glad/gl.h>
+#pragma once
+
 #include <GLFW/glfw3.h>
-#include <string>
-#include <unordered_map>
-#include <iostream>
 #include <filesystem>
 #include <fstream>
+#include <glad/gl.h>
+#include <iostream>
+#include <string>
+#include <unordered_map>
 
 namespace my {
 enum class UniformType { Float, Vec3, Mat4 };
