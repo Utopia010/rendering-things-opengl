@@ -11,10 +11,10 @@ class ProjectConfig(ConanFile):
             "glm/1.0.3",
             "glfw/3.4",
             "glad/2.0.8",
-            "assimp/6.0.5",
+            "assimp/6.0.5"
         ]
         [self.requires(lib) for lib in depend_list]
-        self.requires("stb/cci.20240531", override=True)
+        self.requires("stb/cci.20240531", force=True)
 
     def layout(self):
         cmake_layout(self, build_folder="build")

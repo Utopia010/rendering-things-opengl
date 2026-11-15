@@ -13,18 +13,6 @@ uniform float teapotAo;
 
 // constant
 const float PI = 3.14159265359;
-// float DistributionGGX(float roughness, vec3 N, vec3 H) {
-//     float upper = roughness*roughness;
-//     float lower = pow(dot(N, H), 2.0)*(upper-1)+1;
-//     lower = lower*lower*PI;
-//     return upper/lower;
-// }
-// float GeometrySmith(vec3 N, vec3 V, float roughness){
-//     float upper = max(dot(N,V), 0.0);
-//     float k = pow(roughness+1, 2)/8.0;
-//     float lower = upper*(1-k) + k;
-//     return upper/lower;
-// }
 float DistributionGGX(float roughness, vec3 N, vec3 H) {
     float a = roughness * roughness;
     float a2 = a * a;

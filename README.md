@@ -10,6 +10,7 @@
 - glm: 数学库
 - assimp: 导入模型
 - imgui: 用于实时渲染的ui
+- stb: 导入texture
 ### 效果
 - PBR(physically based rendering): 模型使用了一个[茶壶](https://j5boom.itch.io/utah-teapot-obj), 或许你需要自己下载一下模型
 <p align="center">

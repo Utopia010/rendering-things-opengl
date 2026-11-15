@@ -9,11 +9,12 @@
 #include <unordered_map>
 
 namespace my {
-enum class UniformType { Float, Vec3, Mat4 };
+enum class UniformType { Int, Float, Vec3, Mat4 };
 class ShaderProgram {
 public:
   ShaderProgram(const std::string &vertexShaderFile,
-                const std::string &fragmentShaderFile) {
+                const std::string &fragmentShaderFile,
+                bool is_print_source = false) {
     unsigned int VertexShaderHandler = glCreateShader(GL_VERTEX_SHADER);
     unsigned int FragmentShaderHandler = glCreateShader(GL_FRAGMENT_SHADER);
     const char *ShaderSourcePointer;
@@ -21,7 +22,7 @@ public:
     char buf[512];
     std::string vertexShaderSource, fragmentShaderSource;
 
-    ReadShaderSource(vertexShaderFile, vertexShaderSource, true);
+    ReadShaderSource(vertexShaderFile, vertexShaderSource, is_print_source);
     ShaderSourcePointer = vertexShaderSource.c_str();
     glShaderSource(VertexShaderHandler, 1, &ShaderSourcePointer, NULL);
     glCompileShader(VertexShaderHandler);
@@ -30,7 +31,7 @@ public:
       glGetShaderInfoLog(VertexShaderHandler, 512, nullptr, buf);
       std::printf("[ERROR]>[SHADER]>[VERTEX]>[COMPILE]: %s\n", buf);
     }
-    ReadShaderSource(fragmentShaderFile, fragmentShaderSource, true);
+    ReadShaderSource(fragmentShaderFile, fragmentShaderSource, is_print_source);
     ShaderSourcePointer = fragmentShaderSource.c_str();
     glShaderSource(FragmentShaderHandler, 1, &ShaderSourcePointer, nullptr);
     glCompileShader(FragmentShaderHandler);
@@ -53,7 +54,7 @@ public:
   }
   void bind() { glUseProgram(ShaderProgramHandler_); }
   void unbind() { glUseProgram(0); }
-  void setUniform(const std::string name, UniformType type, float *ptr) {
+  void setUniform(const std::string name, UniformType type, void *ptr) {
     unsigned int location;
     if (!uniformLocations_.contains(name)) {
       const char *name_ptr = name.data();
@@ -66,14 +67,18 @@ public:
     } else
       location = uniformLocations_[name];
     switch (type) {
+    case UniformType::Int:
+      glProgramUniform1i(ShaderProgramHandler_, location, *(int *)ptr);
+      break;
     case UniformType::Float:
-      glProgramUniform1f(ShaderProgramHandler_, location, *ptr);
+      glProgramUniform1f(ShaderProgramHandler_, location, *(float *)ptr);
       break;
     case UniformType::Vec3:
-      glProgramUniform3fv(ShaderProgramHandler_, location, 1, ptr);
+      glProgramUniform3fv(ShaderProgramHandler_, location, 1, (float *)ptr);
       break;
     case UniformType::Mat4:
-      glProgramUniformMatrix4fv(ShaderProgramHandler_, location, 1, false, ptr);
+      glProgramUniformMatrix4fv(ShaderProgramHandler_, location, 1, false,
+                                (float *)ptr);
       break;
     default:
       std::printf("[WARINNING]: unkown enum type\n");
